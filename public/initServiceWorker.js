@@ -14,36 +14,25 @@ function urlB64ToUint8Array(base64String) {
 }
 
 if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-        navigator.serviceWorker.register("/sw.js").then(
-            (registration) => {
-                console.log("登録成功");
-                registration.pushManager
-                    .getSubscription()
-                    .then((subscription) => {
-                        console.log(subscription);
-                        if (!subscription) {
-                            registration.pushManager
-                                .subscribe({
-                                    userVisibleOnly: true,
-                                    applicationServerKey: urlB64ToUint8Array(
-                                        "BEs1bBRQ7WUXKnws0PeHO5pnf36LQOgnhMSxJdIWigJnGxBMbB_39fNxIdt4n8tLfjcy2MEIBA-9e_AUXwxLQ-Q"
-                                    )
-                                })
-                                .then((subscription) => {
-                                    console.log(
-                                        `endpoint: ${subscription.endpoint}`
-                                    );
-                                    console.log(
-                                        `toJson: ${subscription.toJSON}`
-                                    );
-                                });
-                        }
-                    });
-            },
-            () => {
-                console.log("登録失敗");
-            }
-        );
+    window.addEventListener("load", async () => {
+        const registration = await navigator.serviceWorker
+            .register("/sw.js")
+            .catch(console.error);
+        console.log("sw registered.");
+
+        let subscription = await registration.pushManager.getSubscription();
+        console.log(subscription);
+        if (!subscription) {
+            subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlB64ToUint8Array(
+                    "BEs1bBRQ7WUXKnws0PeHO5pnf36LQOgnhMSxJdIWigJnGxBMbB_39fNxIdt4n8tLfjcy2MEIBA-9e_AUXwxLQ-Q" // 適当
+                )
+            });
+            console.log(`subscribed! endpoint: ${subscription.endpoint}`);
+        }
+        () => {
+            console.log("sw not registered.");
+        };
     });
 }

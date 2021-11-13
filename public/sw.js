@@ -1,5 +1,5 @@
 self.addEventListener("install", (event) => {
-    console.log("serviceWorkerインストール");
+    console.log("sw install");
 });
 
 self.addEventListener("activate", (event) => {
@@ -14,22 +14,19 @@ self.addEventListener("fetch", (event) => {
     if (!validateRequest(event.request)) return;
 
     event.respondWith(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.match(event.request).then((response) => {
-                console.log(
-                    `cache ${JSON.stringify(event.request.url)} is ${
-                        response ? "match" : "not match"
-                    }`
-                );
-                return (
-                    response ||
-                    fetch(event.request).then((response) => {
-                        console.log(`fetch ${event.request.url}`);
-                        cache.put(event.request, response.clone());
-                        return response;
-                    })
-                );
-            });
+        caches.open(CACHE_NAME).then(async (cache) => {
+            const response = await cache.match(event.request);
+            console.log(
+                `cache ${JSON.stringify(event.request.url)} is ${
+                    response ? "match" : "not match"
+                }`
+            );
+            if (response) return response;
+
+            const fetchResponse = await fetch(event.request);
+            console.log(`fetch ${event.request.url}`);
+            cache.put(event.request, fetchResponse.clone());
+            return fetchResponse;
         })
     );
 });
