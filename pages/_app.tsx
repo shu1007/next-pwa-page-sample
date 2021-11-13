@@ -5,7 +5,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     return (
         <>
             <Script src="/sw.js"></Script>
-            <Script src="/installServiceWorker.js"></Script>
+            <Script src="/initServiceWorker.js"></Script>
             <Component {...pageProps} />;
         </>
     );
